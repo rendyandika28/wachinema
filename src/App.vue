@@ -1,28 +1,11 @@
 <template>
   <div id="app">
-    <router-view :key="$route.path" :user="user" />
+    <router-view :key="$route.path" />
   </div>
 </template>
 
 <script>
-import firebase from "./utils/firebase";
-
-export default {
-  data() {
-    return {
-      user: null,
-    };
-  },
-  created() {
-    firebase.auth().onAuthStateChanged((authUser) => {
-      if (authUser) {
-        this.user = authUser;
-      } else {
-        this.user = null;
-      }
-    });
-  },
-};
+export default {};
 </script>
 
 <style>
@@ -33,5 +16,6 @@ export default {
 body {
   box-sizing: border-box;
   overflow-x: hidden;
+  /* font-family: ; */
 }
 </style>

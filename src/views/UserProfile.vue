@@ -3,21 +3,28 @@
     <Header />
     <div class="userprofile__content">
       <div class="userprofile__data">
-        <h1>Rendy Andika</h1>
-        <h3>rendyrendy@gmail.com</h3>
+        <h1>{{ userData.displayName }}</h1>
+        <h3>{{ userData.email }}</h3>
         <form action="">
           <div class="form-group">
             <label for="username">Username</label>
-            <input id="username" type="text" />
+            <input
+              id="username"
+              type="text"
+              v-model="userData.displayName"
+              maxlength="25"
+              @keydown.space.prevent
+            />
           </div>
           <div class="form-group">
             <label for="email">Email</label>
-            <input id="email" type="text" />
+            <input id="email" type="text" v-model="userData.email" />
           </div>
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label for="password">Password</label>
-            <input id="password" type="text" />
-          </div>
+            <input id="password" type="text" v-model="userData.password" />
+          </div> -->
+          <Button title="save changes" bcolor="#800000" size />
         </form>
       </div>
       <div class="userprofile__favorite">
@@ -35,14 +42,24 @@
 
 <script>
 import Header from "../components/Header";
+import Button from "../components/Button";
 import FavoriteMovie from "../components/FavoriteMovie";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "UserProfile",
   components: {
     Header,
+    Button,
     FavoriteMovie,
   },
+  methods: {
+    ...mapActions(["getUserData"]),
+  },
+  created() {
+    this.getUserData();
+  },
+  computed: mapGetters(["userData"]),
 };
 </script>
 <style>
@@ -58,7 +75,6 @@ export default {
   display: flex;
   justify-content: space-evenly;
   padding-top: 150px;
-  /* align-items: center; */
 }
 
 .userprofile__data {

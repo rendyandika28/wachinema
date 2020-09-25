@@ -1,5 +1,5 @@
 <template>
-  <div class="rowfilm" v-scroll-reveal.reset v-if="movies.length >= 1">
+  <div class="rowfilm" v-if="movies.length >= 1">
     <div class="rowfilm__titleWrapper">
       <h2 class="rowfilm__title">{{ titleRow }}</h2>
       <router-link

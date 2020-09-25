@@ -25,10 +25,22 @@
           bcolor="#333"
           size="normal"
         ></Button>
-        <Button title="Watch Trailers" bcolor="#333" size></Button>
+        <Button
+          @button-click="playVideo"
+          title="Watch Trailers"
+          bcolor="#333"
+          size
+        ></Button>
       </div>
     </div>
     <div class="banner__fadeBottom"></div>
+    <youtube
+      class="frameVideo"
+      v-if="trailerUrl && heroBanner"
+      :video-id="trailerUrl"
+      width="100%"
+      height="460"
+    ></youtube>
   </div>
 </template>
 
@@ -37,6 +49,7 @@ import Button from "./Button";
 import axios from "../data/axios.js";
 import requests from "../data/request.js";
 import { truncate } from "../utils/utils";
+import movieTrailer from "movie-trailer";
 
 export default {
   name: "Banner",
@@ -49,6 +62,7 @@ export default {
         backdrop_path: null,
       },
       truncate,
+      trailerUrl: null,
     };
   },
   methods: {
@@ -68,20 +82,23 @@ export default {
         query: { link: requests.fetchTrending },
       });
     },
+    playVideo() {
+      if (this.trailerUrl) {
+        this.trailerUrl = null;
+        console.log("null", this.trailerUrl);
+      } else {
+        movieTrailer(this.heroBanner.title)
+          .then((url) => {
+            const urlParams = new URLSearchParams(new URL(url).search);
+            this.trailerUrl = urlParams.get("v");
+            console.log("fill", this.trailerUrl);
+          })
+          .catch(() => this.$swal("Maaf", "Video tidak ditemukan", "warning"));
+      }
+    },
   },
   async mounted() {
     this.setBanner(await this.fetchData());
-
-    // const API_KEY = "f15d819549589d708cf177ff07116a0a";
-    // fetch(
-    //   `https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}&language=en-US`
-    // )
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     this.setBanner(
-    //       data.results[Math.floor(Math.random() * data.results.length - 1)]
-    //     );
-    //   });
   },
   computed: {
     bannerExistence() {
@@ -95,7 +112,7 @@ export default {
 .banner {
   color: white;
   object-fit: contain;
-  height: 500px;
+  min-height: 500px;
   border: 1px solid black;
   background-size: cover !important;
   margin-bottom: 50px;

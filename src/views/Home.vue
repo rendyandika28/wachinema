@@ -47,7 +47,7 @@ import requests from "../data/request.js";
 
 export default {
   name: "Home",
-  props: ["user"],
+  // props: ["user"],
   components: { Header, Banner, RowFilm, Footer },
   data() {
     return {

@@ -16,17 +16,17 @@
         <p class="header__greeting">
           Halo&nbsp;
           <span>
-            <strong>{{ userDisplayName }}</strong>
+            <strong>{{ userData.displayName }}</strong>
           </span>
         </p>
         <div class="dropDownContent">
-          <!-- <router-link
+          <router-link
             :to="{
               name: 'UserProfile',
-              params: { userid: user.uid },
+              params: { userid: userData.displayName },
             }"
             ><a>My Profile</a>
-          </router-link> -->
+          </router-link>
         </div>
       </div>
       <Button
@@ -53,10 +53,9 @@
 <script>
 import Button from "./Button";
 import firebase from "../utils/firebase";
-
+import { mapGetters, mapActions } from "vuex";
 export default {
   name: "Header",
-  props: ["user"],
   components: {
     Button,
   },
@@ -65,7 +64,6 @@ export default {
       toggle: false,
       headerBlack: false,
       searchQuery: "",
-      userData: {},
     };
   },
   methods: {
@@ -81,22 +79,17 @@ export default {
         name: "Login",
       });
     },
+    ...mapActions(["getUserData"]),
   },
   created() {
+    this.getUserData();
     window.addEventListener("scroll", () => {
       if (window.scrollY > 100) {
         this.headerBlack = true;
       } else this.headerBlack = false;
     });
   },
-  computed: {
-    userDisplayName() {
-      return this.userData.displayName;
-    },
-  },
-  mounted() {
-    this.userData = this.user;
-  },
+  computed: mapGetters(["userData"]),
 };
 </script>
 

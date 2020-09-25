@@ -1,6 +1,7 @@
 <template>
-  <div class="details" v-scroll-reveal.reset>
+  <div class="details">
     <div
+      v-if="movie.backdrop_path"
       class="details__film"
       :style="{
         background:
@@ -29,7 +30,12 @@
             <span>{{ movieGenres.join(", ") }}</span>
           </h4>
           <div class="details__action">
-            <Button title="Watch Trailers" bcolor="#333" size></Button>
+            <Button
+              @button-click="playVideo"
+              title="Watch Trailers"
+              bcolor="#333"
+              size
+            ></Button>
             <Button
               title="add to favorite"
               bcolor="#333"
@@ -39,6 +45,14 @@
         </div>
       </div>
     </div>
+    <youtube
+      class="frameVideo"
+      v-if="trailerUrl"
+      :video-id="trailerUrl"
+      width="100%"
+      height="460"
+      key="frameVideo"
+    ></youtube>
     <RowFilm
       titleRow="Similars Movies"
       :fetchUrl="movieCategoryLink"
@@ -52,6 +66,7 @@ import Header from "../components/Header";
 import Button from "../components/Button";
 import RowFilm from "../components/RowFilm";
 import axios from "../data/axios";
+import movieTrailer from "movie-trailer";
 
 export default {
   name: "Details",
@@ -67,6 +82,7 @@ export default {
       movieCategoryLink: this.$route.query.link,
       movieGenres: [],
       baseUrl: "https://image.tmdb.org/t/p/original/",
+      trailerUrl: "",
     };
   },
   methods: {
@@ -87,6 +103,18 @@ export default {
       this.setMovies(await this.fetchData(this.movieID));
       this.setGenresMovie();
     },
+    playVideo() {
+      if (this.trailerUrl) {
+        this.trailerUrl = "";
+      } else {
+        movieTrailer(this.movie.title)
+          .then((url) => {
+            const urlParams = new URLSearchParams(new URL(url).search);
+            this.trailerUrl = urlParams.get("v");
+          })
+          .catch(() => this.$swal("Maaf", "Video tidak ditemukan", "warning"));
+      }
+    },
   },
   async mounted() {
     await this.setMoviesData();
@@ -100,6 +128,7 @@ export default {
       return `${this.baseUrl}${this.movie.poster_path}`;
     },
   },
+  created() {},
   watch: {
     async $route(to) {
       await this.setMoviesData(to);
@@ -115,6 +144,11 @@ export default {
   min-height: 600px;
   background-color: black;
   background-size: cover !important;
+  /* margin-bottom: 40px; */
+}
+
+.frameVideo {
+  transition: all ease-in 0.4s;
   margin-bottom: 40px;
 }
 

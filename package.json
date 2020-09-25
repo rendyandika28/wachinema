@@ -11,10 +11,13 @@
     "axios": "^0.20.0",
     "core-js": "^3.6.5",
     "firebase": "^7.21.0",
+    "movie-trailer": "^2.0.6",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vue-scroll-reveal": "^1.0.11",
-    "vue-sweetalert2": "^3.0.8"
+    "vue-sweetalert2": "^3.0.8",
+    "vue-youtube": "^1.4.0",
+    "vuex": "^3.5.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
