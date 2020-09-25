@@ -1,28 +1,37 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <router-view :key="$route.path" :user="user" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import firebase from "./utils/firebase";
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  data() {
+    return {
+      user: null,
+    };
+  },
+  created() {
+    firebase.auth().onAuthStateChanged((authUser) => {
+      if (authUser) {
+        this.user = authUser;
+      } else {
+        this.user = null;
+      }
+    });
+  },
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+* {
+  margin: 0;
+}
+
+body {
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 </style>
