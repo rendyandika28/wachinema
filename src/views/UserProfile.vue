@@ -5,7 +5,14 @@
       <div class="userprofile__data">
         <h1>{{ displayName }}</h1>
         <h3>{{ email }}</h3>
-        <form action="">
+        <Button
+          @button-click="isEditing = !isEditing"
+          :title="btnEditTitle"
+          class="userprofile__btnEdit"
+          bcolor="#800000"
+          size="normal"
+        ></Button>
+        <form action="" v-if="isEditing">
           <div class="form-group">
             <label for="username">Username</label>
             <input
@@ -67,11 +74,20 @@ export default {
       },
       favoriteMovieData: [],
       userDataLocalStorage: {},
+      isEditing: false,
     };
   },
   methods: {
     ...mapActions(["getUserData"]),
     ...mapMutations(["setUpdatedUserData"]),
+    reauthenticate(currentPassword) {
+      const user = firebase.auth().currentUser;
+      const credential = firebase.auth.EmailAuthProvider.credential(
+        this.userData.email,
+        currentPassword
+      );
+      return user.reauthenticateWithCredential(credential);
+    },
     updateUserData() {
       const user = firebase.auth().currentUser;
       if (this.formUser) {
@@ -81,34 +97,38 @@ export default {
               displayName: this.formUser.displayName,
             })
             .then(function () {})
-            .catch(function (error) {
-              console.log("name", error.message);
+            .catch(function (err) {
+              this.$swal("", err.message, "warning");
             });
         }
-
         if (this.formUser.email) {
-          const credential = firebase.auth.EmailAuthProvider.credential(
-            this.userData.email,
-            this.userData.uid
+          const currentPassword = prompt(
+            "type your current password to change Email"
           );
-          user.reauthenticateWithCredential(credential).then((user) => {
-            console.log("email", user);
-          });
-          // user
-          //   .updateEmail(this.formUser.email)
-          //   .then(function () {
-          //     // Update successful.
-          //   })
-          //   .catch(function (error) {
-          //     // An error happened.
-          //     console.log("email", error.message);
-          //   });
+          const newEmail = this.formUser.email;
+          this.reauthenticate(currentPassword)
+            .then(() => {
+              user
+                .updateEmail(newEmail)
+                .then(function () {
+                  // Update successful.
+                  console.log("success");
+                })
+                .catch(function (error) {
+                  // An error happened.
+                  console.log("error", error.message);
+                });
+            })
+            .catch((err) => {
+              this.$swal("", err.message, "warning");
+              return;
+            });
         }
         this.$store.commit("setUpdatedUserData", this.formUser);
-
         this.$swal("", "Data Changed", "success");
         this.formUser.displayName = "";
         this.formUser.email = "";
+        this.isEditing = false;
       }
     },
   },
@@ -122,7 +142,10 @@ export default {
       return this.userData.displayName || this.userDataLocalStorage.username;
     },
     email() {
-      return this.userData.email;
+      return this.userData.email || this.userDataLocalStorage.email;
+    },
+    btnEditTitle() {
+      return this.isEditing ? "cancel" : "edit profile";
     },
   },
   mounted() {
@@ -138,7 +161,7 @@ export default {
           id: doc.id,
           data: doc.data(),
         }));
-        console.log(this.favoriteMovieData);
+        // console.log(this.favoriteMovieData);
       });
   },
   watch: {},
@@ -162,14 +185,14 @@ export default {
 .userprofile__data {
   flex: 0.3;
 }
+.userprofile__btnEdit {
+  margin: 10px 0;
+}
 
 .userprofile__data h1,
 .userprofile__data h3 {
   font-weight: 200;
-}
-
-.userprofile__data form {
-  margin-top: 50px;
+  margin-bottom: 5px;
 }
 .userprofile__data .form-group {
   display: flex;
