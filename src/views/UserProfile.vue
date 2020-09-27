@@ -3,37 +3,41 @@
     <Header />
     <div class="userprofile__content">
       <div class="userprofile__data">
-        <h1>{{ userData.displayName }}</h1>
-        <h3>{{ userData.email }}</h3>
+        <h1>{{ displayName }}</h1>
+        <h3>{{ email }}</h3>
         <form action="">
           <div class="form-group">
             <label for="username">Username</label>
             <input
               id="username"
               type="text"
-              v-model="userData.displayName"
+              v-model="formUser.displayName"
               maxlength="25"
               @keydown.space.prevent
             />
           </div>
           <div class="form-group">
             <label for="email">Email</label>
-            <input id="email" type="text" v-model="userData.email" />
+            <input id="email" type="text" v-model="formUser.email" />
           </div>
-          <!-- <div class="form-group">
-            <label for="password">Password</label>
-            <input id="password" type="text" v-model="userData.password" />
-          </div> -->
-          <Button title="save changes" bcolor="#800000" size />
+          <Button
+            @button-click="updateUserData"
+            title="save changes"
+            bcolor="#800000"
+            size
+          />
         </form>
       </div>
       <div class="userprofile__favorite">
         <h2>List of my favorite movies</h2>
         <div class="favoritemovie__wrapper">
-          <FavoriteMovie></FavoriteMovie>
-          <FavoriteMovie></FavoriteMovie>
-          <FavoriteMovie></FavoriteMovie>
-          <FavoriteMovie></FavoriteMovie>
+          <FavoriteMovie
+            :key="movie.id"
+            :movieId="movie.id"
+            v-for="movie in favoriteMovieData"
+            :title="movie.data.title"
+            :imgUrl="movie.data.imgUrl"
+          ></FavoriteMovie>
         </div>
       </div>
     </div>
@@ -44,7 +48,9 @@
 import Header from "../components/Header";
 import Button from "../components/Button";
 import FavoriteMovie from "../components/FavoriteMovie";
-import { mapGetters, mapActions } from "vuex";
+import firebase from "../utils/firebase";
+
+import { mapGetters, mapActions, mapMutations } from "vuex";
 
 export default {
   name: "UserProfile",
@@ -53,13 +59,89 @@ export default {
     Button,
     FavoriteMovie,
   },
+  data() {
+    return {
+      formUser: {
+        displayName: "",
+        email: "",
+      },
+      favoriteMovieData: [],
+      userDataLocalStorage: {},
+    };
+  },
   methods: {
     ...mapActions(["getUserData"]),
+    ...mapMutations(["setUpdatedUserData"]),
+    updateUserData() {
+      const user = firebase.auth().currentUser;
+      if (this.formUser) {
+        if (this.formUser.displayName) {
+          user
+            .updateProfile({
+              displayName: this.formUser.displayName,
+            })
+            .then(function () {})
+            .catch(function (error) {
+              console.log("name", error.message);
+            });
+        }
+
+        if (this.formUser.email) {
+          const credential = firebase.auth.EmailAuthProvider.credential(
+            this.userData.email,
+            this.userData.uid
+          );
+          user.reauthenticateWithCredential(credential).then((user) => {
+            console.log("email", user);
+          });
+          // user
+          //   .updateEmail(this.formUser.email)
+          //   .then(function () {
+          //     // Update successful.
+          //   })
+          //   .catch(function (error) {
+          //     // An error happened.
+          //     console.log("email", error.message);
+          //   });
+        }
+        this.$store.commit("setUpdatedUserData", this.formUser);
+
+        this.$swal("", "Data Changed", "success");
+        this.formUser.displayName = "";
+        this.formUser.email = "";
+      }
+    },
   },
   created() {
     this.getUserData();
+    this.userDataLocalStorage = JSON.parse(localStorage.getItem("user"));
   },
-  computed: mapGetters(["userData"]),
+  computed: {
+    ...mapGetters(["userData"]),
+    displayName() {
+      return this.userData.displayName || this.userDataLocalStorage.username;
+    },
+    email() {
+      return this.userData.email;
+    },
+  },
+  mounted() {
+    firebase
+      .firestore()
+      .collection("users")
+      .doc(this.userDataLocalStorage.useruid)
+      .collection("favorites")
+      .orderBy("timestamp", "desc")
+
+      .onSnapshot((querySnapshot) => {
+        this.favoriteMovieData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }));
+        console.log(this.favoriteMovieData);
+      });
+  },
+  watch: {},
 };
 </script>
 <style>

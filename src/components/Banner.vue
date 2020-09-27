@@ -4,9 +4,9 @@
     class="banner"
     :style="{
       background:
-        'linear-gradient( rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3) ),url(https://image.tmdb.org/t/p/original/' +
-        heroBanner.backdrop_path +
-        ')',
+        'linear-gradient( rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3) ),' +
+        bannerBackground +
+        '',
     }"
   >
     <div class="banner__contents">
@@ -26,6 +26,7 @@
           size="normal"
         ></Button>
         <Button
+          v-if="showFilm"
           @button-click="playVideo"
           title="Watch Trailers"
           bcolor="#333"
@@ -87,7 +88,7 @@ export default {
         this.trailerUrl = null;
         console.log("null", this.trailerUrl);
       } else {
-        movieTrailer(this.heroBanner.title)
+        movieTrailer(this.heroBanner.title || "")
           .then((url) => {
             const urlParams = new URLSearchParams(new URL(url).search);
             this.trailerUrl = urlParams.get("v");
@@ -103,6 +104,16 @@ export default {
   computed: {
     bannerExistence() {
       return this.heroBanner && this.heroBanner.backdrop_path;
+    },
+    showFilm() {
+      return this.trailerUrl ? false : true;
+    },
+    bannerBackground() {
+      return (
+        "url(https://image.tmdb.org/t/p/original/" +
+          this.heroBanner.backdrop_path +
+          ")" || null
+      );
     },
   },
 };

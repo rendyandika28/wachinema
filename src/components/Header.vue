@@ -16,14 +16,18 @@
         <p class="header__greeting">
           Halo&nbsp;
           <span>
-            <strong>{{ userData.displayName }}</strong>
+            <strong>{{
+              userData.displayName || userDataLocalStorage.username
+            }}</strong>
           </span>
         </p>
         <div class="dropDownContent">
           <router-link
             :to="{
               name: 'UserProfile',
-              params: { userid: userData.displayName },
+              params: {
+                userid: userData.displayName || userDataLocalStorage.username,
+              },
             }"
             ><a>My Profile</a>
           </router-link>
@@ -64,6 +68,7 @@ export default {
       toggle: false,
       headerBlack: false,
       searchQuery: "",
+      userDataLocalStorage: JSON.parse(localStorage.getItem("user")),
     };
   },
   methods: {
@@ -75,6 +80,8 @@ export default {
     },
     handleSignOut() {
       firebase.auth().signOut();
+      localStorage.removeItem("user");
+      localStorage.removeItem("loglevel:webpack-dev-server");
       this.$router.push({
         name: "Login",
       });
@@ -89,7 +96,10 @@ export default {
       } else this.headerBlack = false;
     });
   },
-  computed: mapGetters(["userData"]),
+  computed: {
+    ...mapGetters(["userData"]),
+  },
+  watch: {},
 };
 </script>
 

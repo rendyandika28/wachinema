@@ -1,17 +1,42 @@
 <template>
   <div class="favoritemovie">
-    <img
-      src="https://image.tmdb.org/t/p/original//8g1rUabKleLvovt0Sx6bXgWfC42.jpg"
-      alt=""
-      width="110"
-    />
-    <h3>Avengers Sevenfold</h3>
-    <span>X</span>
+    <img :src="imgUrlFilm" alt="" width="110" />
+    <h3>{{ title }}</h3>
+    <span @click="deleteFilm">X</span>
   </div>
 </template>
 
 <script>
-export default {};
+import firebase from "../utils/firebase";
+
+export default {
+  name: "FavoriteMovie",
+  props: ["title", "imgUrl", "movieId"],
+  methods: {
+    deleteFilm() {
+      firebase
+        .firestore()
+        .collection("users")
+        .doc(firebase.auth().currentUser.uid)
+        .collection("favorites")
+        .doc(this.movieId)
+        .delete()
+        .then(function () {
+          console.log("Document successfully deleted!");
+        })
+        .catch(function (error) {
+          console.error("Error removing document: ", error);
+        });
+    },
+  },
+  computed: {
+    imgUrlFilm() {
+      return this.imgUrl === "https://image.tmdb.org/t/p/original/null"
+        ? "https://www.flaticon.com/svg/static/icons/svg/633/633600.svg"
+        : this.imgUrl;
+    },
+  },
+};
 </script>
 
 <style>
@@ -29,6 +54,7 @@ export default {};
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
   object-fit: contain;
+  height: 70px;
 }
 
 .favoritemovie h3 {
