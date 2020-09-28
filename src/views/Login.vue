@@ -91,6 +91,7 @@
 
 <script>
 import Button from "../components/Button";
+import { mapMutations } from "vuex";
 
 import firebase from "../utils/firebase";
 
@@ -117,6 +118,8 @@ export default {
     clickModal() {
       this.showModal = !this.showModal;
     },
+    ...mapMutations(["setNewUserDisplayName"]),
+
     submitRegister() {
       firebase
         .auth()
@@ -128,6 +131,11 @@ export default {
           authUser.user.updateProfile({
             displayName: this.formRegister.username,
           });
+          this.$store.commit(
+            "setNewUserDisplayName",
+            this.formRegister.username
+          );
+
           this.$swal("Selamat", "akun anda berhasil didaftarkan", "success");
           this.showModal = false;
           this.$router.push({
@@ -151,6 +159,8 @@ export default {
         )
         .then(() => {
           this.$swal("Success", "Enjoy your film!", "success");
+          // this.$router.go({ path: this.$router.path });
+
           this.$router.push({
             name: "Home",
           });
@@ -314,6 +324,9 @@ hr {
   }
 }
 @media (max-width: 567px) {
+  .modal-content {
+    width: 90%; /* Could be more or less, depending on screen size */
+  }
   .login__ {
     flex-direction: column;
   }

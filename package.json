@@ -1,5 +1,6 @@
 {
   "name": "watchinema",
+  "author": "Rendy Andika",
   "version": "0.1.0",
   "private": true,
   "scripts": {

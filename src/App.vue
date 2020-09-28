@@ -14,8 +14,8 @@ export default {};
 }
 
 body {
+  font-family: "Roboto", sans-serif;
   box-sizing: border-box;
   overflow-x: hidden;
-  /* font-family: ; */
 }
 </style>

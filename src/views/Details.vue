@@ -1,7 +1,6 @@
 <template>
   <div class="details">
     <div
-      v-if="movie.backdrop_path"
       class="details__film"
       :style="{
         background:
@@ -38,9 +37,9 @@
               size
             ></Button>
             <Button
-              v-if="showClickFavorite"
               @button-click="handleClickFavorite"
-              title="add to favorite"
+              :disabled="isDisabled"
+              :title="isFavorite"
               bcolor="#333"
               size="normal"
             ></Button>
@@ -88,14 +87,19 @@ export default {
       movieGenres: [],
       baseUrl: "https://image.tmdb.org/t/p/original/",
       trailerUrl: "",
-      movieFirebase: [],
-      showClickFavorite: true,
+      movieIdFirebase: "",
+      isMatch: false,
+      isDisabled: false,
+      userDataLocalStorage: {},
     };
   },
   methods: {
+    ...mapActions(["getUserDataFavorite"]),
+
     setMovies(data) {
       this.movie = data;
     },
+
     fetchData: async (movieID) => {
       const request = await axios.get(
         "/movie/" + movieID + "?api_key=f15d819549589d708cf177ff07116a0a"
@@ -105,11 +109,13 @@ export default {
     setGenresMovie() {
       this.movie.genres.map((genre) => this.movieGenres.push(genre.name));
     },
+
     async setMoviesData(to = null) {
       this.movieID = to ? to.params.id : this.$route.params.id;
       this.setMovies(await this.fetchData(this.movieID));
       this.setGenresMovie();
     },
+
     playVideo() {
       if (!this.trailerUrl) {
         movieTrailer(this.movie?.title || "")
@@ -120,47 +126,81 @@ export default {
           .catch(() => this.$swal("Maaf", "Video tidak ditemukan", "warning"));
       }
     },
+
     handleClickFavorite() {
-      firebase
-        .firestore()
-        .collection("users")
-        .doc(firebase.auth().currentUser.uid)
-        .collection("favorites")
-        .add({
-          title:
-            this.movie.title || this.movie.name || this.movie.original_name,
-          imgUrl: `${this.baseUrl}${this.movie.backdrop_path}`,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      if (!this.isMatch) {
+        this.isDisabled = true;
+        firebase
+          .firestore()
+          .collection("users")
+          .doc(
+            firebase.auth().currentUser.uid ||
+              this.userData.uid ||
+              this.userDataLocalStorage.userid
+          )
+          .collection("favorites")
+          .add({
+            title:
+              this.movie.title || this.movie.name || this.movie.original_name,
+            imgUrl: `${this.baseUrl}${this.movie.backdrop_path}`,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          })
+          .then((data) => {
+            this.movieIdFirebase = data.id;
+            this.isDisabled = false;
+          });
+        this.$toast.success("Success add Favorite", {
+          // optional options Object
+          type: "success",
+          duration: 3000,
+          position: "top",
         });
-
-      this.$toast.success("Success add Favorite", {
-        // optional options Object
-        type: "success",
-        duration: 3000,
-        position: "top",
-      });
-
-      this.showClickFavorite = false;
+        this.isMatch = true;
+      } else {
+        firebase
+          .firestore()
+          .collection("users")
+          .doc(
+            firebase.auth().currentUser.uid ||
+              this.userData.uid ||
+              this.userDataLocalStorage.userid
+          )
+          .collection("favorites")
+          .doc(this.movieIdFirebase)
+          .delete()
+          .then(function () {
+            console.log("Document successfully deleted!");
+          })
+          .catch(function (error) {
+            console.error("Error removing document: ", error);
+          });
+        this.$toast.warning("Success delete Favorite", {
+          // optional options Object
+          type: "warning",
+          duration: 3000,
+          position: "top",
+        });
+        this.isMatch = false;
+      }
     },
-    ...mapActions(["getUserDataFavorite"]),
+
+    // Check if film has favorite
+    isFilmHasFavorite() {
+      this.userDataFavorite.find((movie) => {
+        if (movie.data.title === this.movie.title) {
+          this.isMatch = true;
+          this.movieIdFirebase = movie.id;
+        }
+      });
+    },
   },
+
   async mounted() {
     await this.setMoviesData();
     window.scrollTo(0, 0);
-    firebase
-      .firestore()
-      .collection("users")
-      .doc(firebase.auth().currentUser.uid)
-      .collection("favorites")
-      .orderBy("timestamp", "desc")
-
-      .onSnapshot((querySnapshot) => {
-        this.movieFirebase = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }));
-      });
+    this.isFilmHasFavorite();
   },
+
   computed: {
     title() {
       return this.movie.title || this.movie.name || this.movie.original_name;
@@ -178,12 +218,17 @@ export default {
           ")" || null
       );
     },
-    ...mapGetters(["userDataFavorite"]),
+    isFavorite() {
+      return this.isMatch ? "Remove from favorite" : "Add to favorite";
+    },
+    ...mapGetters(["userData", "userDataFavorite"]),
   },
 
   created() {
     this.getUserDataFavorite();
+    this.userDataLocalStorage = JSON.parse(localStorage.getItem("user"));
   },
+
   watch: {
     async $route(to) {
       await this.setMoviesData(to);
@@ -199,7 +244,6 @@ export default {
   min-height: 600px;
   background-color: black;
   background-size: cover !important;
-  /* margin-bottom: 40px; */
 }
 
 .frameVideo {
@@ -245,6 +289,9 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .details__film {
+    padding: 10px 0 50px;
+  }
   .details__content {
     margin-top: 70px;
     width: 90%;

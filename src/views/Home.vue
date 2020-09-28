@@ -47,7 +47,6 @@ import requests from "../data/request.js";
 
 export default {
   name: "Home",
-  // props: ["user"],
   components: { Header, Banner, RowFilm, Footer },
   data() {
     return {
@@ -65,7 +64,6 @@ export default {
       }
     },
   },
-  mounted() {},
 };
 </script>
 

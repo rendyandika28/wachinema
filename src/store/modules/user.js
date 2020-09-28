@@ -3,50 +3,37 @@ import firebase from "../../utils/firebase";
 const state = {
   user: {},
   favorite: [],
-  // userLocalStorage: JSON.parse(localStorage.getItem("user")),
+  userDataLocalStorage: JSON.parse(localStorage.getItem("user")),
+  newUserDisplayName: "",
+  isLoggedIn: false,
 };
 
 const getters = {
   userData: (state) => state.user,
   userDataFavorite: (state) => state.favorite,
+  newUserDisplayName: (state) => state.newUserDisplayName,
 };
 
 const actions = {
-  getUserData({ commit }) {
-    firebase.auth().onAuthStateChanged((authUser) => {
-      if (authUser) {
-        commit("setUserData", authUser);
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            useruid: authUser.uid,
-            username: authUser.displayName,
-            email: authUser.email,
-          })
-        );
-      } else {
-        this.user = null;
-      }
-    });
+  getUserDataFavorite({ commit }) {
+    console.log(state.userDataLocalStorage);
+    firebase
+      .firestore()
+      .collection("users")
+      .doc(
+        state.userDataLocalStorage.useruid ||
+          firebase.auth().currentUser.uid ||
+          state.user.uid
+      )
+      .collection("favorites")
+      .onSnapshot((querySnapshot) => {
+        const movieFirebase = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }));
+        commit("setUserDataFavorite", movieFirebase);
+      });
   },
-  // updateUserData({ commit }) {
-  //   commit("setDisplayName");
-  // },
-  // getUserDataFavorite({ commit }) {
-  //   firebase
-  //     .firestore()
-  //     .collection("users")
-  //     .doc(this.user.uid)
-  //     .collection("favorites")
-  //     .onSnapshot((querySnapshot) => {
-  //       const movieFirebase = querySnapshot.docs.map((doc) => ({
-  //         id: doc.id,
-  //         data: doc.data(),
-  //       }));
-  //       console.log("data vuex", movieFirebase);
-  //       commit("setUserDataFavorite", movieFirebase);
-  //     });
-  // },
 };
 
 const mutations = {
@@ -63,6 +50,8 @@ const mutations = {
     state.user = user;
   },
   setUserDataFavorite: (state, favorite) => (state.favorite = favorite),
+  setNewUserDisplayName: (state, newUserDisplayName) =>
+    (state.newUserDisplayName = newUserDisplayName),
 };
 
 export default {

@@ -14,10 +14,12 @@
       />
       <div class="dropdown">
         <p class="header__greeting">
-          Halo&nbsp;
+          Halo
           <span>
             <strong>{{
-              userData.displayName || userDataLocalStorage.username
+              newUserDisplayName ||
+              userData.displayName ||
+              userDataLocalStorage.username
             }}</strong>
           </span>
         </p>
@@ -26,7 +28,10 @@
             :to="{
               name: 'UserProfile',
               params: {
-                userid: userData.displayName || userDataLocalStorage.username,
+                userid:
+                  newUserDisplayName ||
+                  userData.displayName ||
+                  userDataLocalStorage.username,
               },
             }"
             ><a>My Profile</a>
@@ -57,7 +62,7 @@
 <script>
 import Button from "./Button";
 import firebase from "../utils/firebase";
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters } from "vuex";
 export default {
   name: "Header",
   components: {
@@ -86,10 +91,8 @@ export default {
         name: "Login",
       });
     },
-    ...mapActions(["getUserData"]),
   },
   created() {
-    this.getUserData();
     window.addEventListener("scroll", () => {
       if (window.scrollY > 100) {
         this.headerBlack = true;
@@ -97,7 +100,7 @@ export default {
     });
   },
   computed: {
-    ...mapGetters(["userData"]),
+    ...mapGetters(["userData", "newUserDisplayName"]),
   },
   watch: {},
 };

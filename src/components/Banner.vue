@@ -1,6 +1,5 @@
 <template>
   <div
-    v-if="heroBanner.backdrop_path"
     class="banner"
     :style="{
       background:
@@ -70,12 +69,16 @@ export default {
     setBanner(data) {
       this.heroBanner = data;
     },
+
+    // Get Data from API
     fetchData: async () => {
       const request = await axios.get(requests.fetchTrending);
       return request.data.results[
         Math.floor(Math.random() * request.data.results.length - 1)
       ];
     },
+
+    // Direct to detail Movie
     detailMovieBanner(id) {
       this.$router.push({
         name: "Details",
@@ -83,6 +86,8 @@ export default {
         query: { link: requests.fetchTrending },
       });
     },
+
+    // Play the video trailer
     playVideo() {
       if (this.trailerUrl) {
         this.trailerUrl = null;
@@ -98,9 +103,11 @@ export default {
       }
     },
   },
+
   async mounted() {
     this.setBanner(await this.fetchData());
   },
+
   computed: {
     bannerExistence() {
       return this.heroBanner && this.heroBanner.backdrop_path;

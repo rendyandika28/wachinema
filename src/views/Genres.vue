@@ -64,22 +64,6 @@ export default {
   },
   async mounted() {
     this.fetchUrl = this.$route.query.link;
-    // this.fetchUrl =
-    //   this.$route.params.genres === "Trending Now"
-    //     ? `/trending/all/week?api_key=${this.API_KEY}&language=en-US`
-    //     : null || this.$route.params.genres === "Top Rated"
-    //     ? `/movie/top_rated?api_key=${this.API_KEY}&language=en-US`
-    //     : null || this.$route.params.genres === "Action Movies"
-    //     ? `/discover/movie?api_key=${this.API_KEY}&with_genres=28`
-    //     : null || this.$route.params.genres === "Comedy Movies"
-    //     ? `/discover/movie?api_key=${this.API_KEY}&with_genres=35`
-    //     : null || this.$route.params.genres === "Horror Movies"
-    //     ? `/discover/movie?api_key=${this.API_KEY}&with_genres=27`
-    //     : null || this.$route.params.genres === "Romance Movies"
-    //     ? `/discover/movie?api_key=${this.API_KEY}&with_genres=10749`
-    //     : null || this.$route.params.genres === "Documentaries Movies"
-    //     ? `/discover/movie?api_key=${this.API_KEY}&with_genres=99`
-    //     : null;
     this.setMovies(await this.fetchData(this.fetchUrl));
     this.showingBanner = await this.movies[
       Math.floor(Math.random() * this.movies.length - 1)

@@ -61,4 +61,11 @@ export default {
 .search__header h1 span:hover {
   color: #9c0000;
 }
+
+@media (max-width: 768px) {
+  .search__header {
+    justify-content: center;
+    padding-left: 0;
+  }
+}
 </style>
