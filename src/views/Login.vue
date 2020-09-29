@@ -91,7 +91,7 @@
 
 <script>
 import Button from "../components/Button";
-import { mapMutations } from "vuex";
+import { mapMutations, mapGetters } from "vuex";
 
 import firebase from "../utils/firebase";
 
@@ -168,6 +168,7 @@ export default {
         .catch((err) => this.$swal("Sorry", err.message, "warning"));
     },
   },
+  computed: { ...mapGetters(["userData", "newUserDisplayName"]) },
 };
 </script>
 

@@ -58,6 +58,6 @@ firebase.auth().onAuthStateChanged((authUser) => {
       );
     }
   } else {
-    store.user = null;
+    store.getters.user = null;
   }
 });

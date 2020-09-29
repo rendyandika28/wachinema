@@ -62,7 +62,7 @@
 <script>
 import Button from "./Button";
 import firebase from "../utils/firebase";
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 export default {
   name: "Header",
   components: {
@@ -77,6 +77,8 @@ export default {
     };
   },
   methods: {
+    ...mapMutations(["setUserData"]),
+
     searchMovie() {
       this.$router.push({
         name: "Search",
@@ -85,6 +87,7 @@ export default {
     },
     handleSignOut() {
       firebase.auth().signOut();
+      this.$store.commit("setUserData", null);
       localStorage.removeItem("user");
       localStorage.removeItem("loglevel:webpack-dev-server");
       this.$router.push({

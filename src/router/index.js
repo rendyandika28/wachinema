@@ -1,5 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import store from "../store";
+
 import firebase from "../utils/firebase";
 import Home from "../views/Home.vue";
 import Genres from "../views/Genres.vue";
@@ -80,7 +82,7 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
   const requireAuth = to.matched.some((record) => record.meta.requiresAuth);
-  // const requireGuest = to.matched.some((record) => record.meta.requiresGuest);
+  const requireGuest = to.matched.some((record) => record.meta.requiresGuest);
   if (requireAuth && !firebase.auth().currentUser) {
     // this route requires auth, check if logged in
     // if not, redirect to login page.
@@ -90,11 +92,15 @@ router.beforeEach(async (to, from, next) => {
     });
   }
   // {{  BUG --> WHEN AUTHUSER DIRECT CHANGE LINK TO /LOGIN IT DIRECT TO / , BUT WHEN AUTHUSER SIGNOUT THO IT DIRECT TO /  }}
-  // else if (requireGuest && firebase.auth().currentUser) {
-  //   next({
-  //     path: "/",
-  //   });
-  // }
+  else if (
+    requireGuest &&
+    firebase.auth().currentUser &&
+    store.getters.userData
+  ) {
+    next({
+      path: "/",
+    });
+  }
   // {{  BUG --> WHEN AUTHUSER DIRECT CHANGE LINK TO /LOGIN IT DIRECT TO / , BUT WHEN AUTHUSER SIGNOUT THO IT DIRECT TO /  }}
   else {
     next(); // make sure to always call next()!
