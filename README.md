@@ -1,5 +1,7 @@
 # Watchinema
 
+(https://i.ibb.co/16d2dWk/Screenshot-2023-08-27-at-11-12-47.png)
+
 ## Description
 
 This web application help you to find bunch of movies, watch the trailer, see the movie description, set your favorite movie and many more. This web application is free to use.
