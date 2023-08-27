@@ -1,6 +1,6 @@
 # Watchinema
 
-(https://i.ibb.co/16d2dWk/Screenshot-2023-08-27-at-11-12-47.png)
+![Project Preview](https://i.ibb.co/16d2dWk/Screenshot-2023-08-27-at-11-12-47.png)
 
 ## Description
 
